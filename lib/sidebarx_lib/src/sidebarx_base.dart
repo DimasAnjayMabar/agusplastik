@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class SidebarX extends StatefulWidget {
   const SidebarX({
-    Key? key,
+    super.key,
     required this.controller,
     this.items = const [],
     this.footerItems = const [],
@@ -23,7 +23,7 @@ class SidebarX extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 300),
     this.collapseIcon = Icons.arrow_back_ios_new,
     this.extendIcon = Icons.arrow_forward_ios,
-  }) : super(key: key);
+  });
 
   /// Default theme of Sidebar
   final SidebarXTheme theme;

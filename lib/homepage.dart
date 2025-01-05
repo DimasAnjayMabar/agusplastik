@@ -1,20 +1,50 @@
 import 'package:agusplastik/assets/colors/colors.dart';
+import 'package:agusplastik/menus/distributor_menu.dart';
+import 'package:agusplastik/menus/gudang_menu.dart';
+import 'package:agusplastik/menus/transaksi_menu.dart';
 import 'package:agusplastik/sidebarx_lib/src/controller/sidebarx_controller.dart';
 import 'package:agusplastik/sidebarx_lib/src/models/sidebarx_item.dart';
 import 'package:agusplastik/sidebarx_lib/src/sidebarx_base.dart';
 import 'package:agusplastik/sidebarx_lib/src/theme/sidebarx_theme.dart';
 import 'package:flutter/material.dart';
 
-class Homepage extends StatelessWidget {
-  Homepage({Key? key}) : super(key: key);
+class Homepage extends StatefulWidget {
+  Homepage({super.key});
 
+  @override
+  _HomepageState createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
   final _controller = SidebarXController(selectedIndex: 0, extended: true);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Menambahkan variabel untuk menyimpan halaman yang aktif
+  int _currentPage = 0;
+
+  // Daftar judul untuk setiap halaman
+  final List<String> _pageTitles = [
+    'Transaksi', // Judul untuk halaman Transaksi
+    'Gudang', // Judul untuk halaman Gudang
+    'Hutang', // Judul untuk halaman Hutang
+    'Piutang', // Judul untuk halaman Piutang
+    'Distributor', // Judul untuk halaman Distributor
+  ];
+
+  // Fungsi untuk logout
+  void _logout() {
+    // Implementasikan logika logout sesuai kebutuhan, misalnya:
+    // - Menghapus session atau token
+    // - Navigasi ke halaman login
+    // Contoh:
+    // Navigator.pushReplacementNamed(context, '/login');
+    print("Logout button pressed");
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SidebarX Example',
+      title: 'Agus Plastik',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: primaryColor,
@@ -86,43 +116,95 @@ class Homepage extends StatelessWidget {
           },
           items: [
             SidebarXItem(
-              icon: Icons.home,
-              label: 'Home',
+              icon: Icons.receipt_long,
+              label: 'Transaksi',
               onTap: () {
-                debugPrint('Hello');
+                setState(() {
+                  _currentPage = 0; // Menetapkan halaman transaksi
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
               },
             ),
-            const SidebarXItem(
-              icon: Icons.search,
-              label: 'Search',
+            SidebarXItem(
+              icon: Icons.warehouse,
+              label: 'Gudang',
+              onTap: () {
+                setState(() {
+                  _currentPage = 1; // Menetapkan halaman gudang
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
             ),
-            const SidebarXItem(
-              icon: Icons.people,
-              label: 'People',
+            SidebarXItem(
+              icon: Icons.money_off,
+              label: 'Hutang',
+              onTap: () {
+                setState(() {
+                  _currentPage = 2; // Menetapkan halaman hutang
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
             ),
-            const SidebarXItem(
-              icon: Icons.favorite,
-              label: 'Favorites',
+            SidebarXItem(
+              icon: Icons.attach_money,
+              label: 'Piutang',
+              onTap: () {
+                setState(() {
+                  _currentPage = 3; // Menetapkan halaman piutang
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+            SidebarXItem(
+              icon: Icons.local_shipping,
+              label: 'Distributor',
+              onTap: () {
+                setState(() {
+                  _currentPage = 4; // Menetapkan halaman distributor
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+            SidebarXItem(
+              icon: Icons.exit_to_app,
+              label: 'Logout',
+              onTap: () {
+                setState(() {
+                  _logout();
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
             ),
           ],
         ),
         appBar: AppBar(
           backgroundColor: canvasColor,
-          title: const Text('SidebarX'),
+          title: Text(
+            _pageTitles[_currentPage], // Mengubah judul sesuai halaman yang aktif
+            style: const TextStyle(color: Colors.white),
+          ),
           leading: IconButton(
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
             icon: const Icon(Icons.menu_rounded),
+            color: Colors.white,
           ),
         ),
-        body: Row(
+        body: IndexedStack(
+          index: _currentPage, // Memilih halaman yang aktif
           children: [
-            Expanded(
-              child: Center(
-                child: _ScreensExample(controller: _controller),
-              ),
-            ),
+            const TransaksiMenu(), // Halaman Transaksi
+            const GudangMenu(), // Halaman Gudang
+            PlaceholderWidget('Hutang'), // Halaman Hutang (Placeholder)
+            PlaceholderWidget('Piutang'), // Halaman Piutang (Placeholder)
+            const DistributorMenu(),
           ],
         ),
       ),
@@ -130,67 +212,18 @@ class Homepage extends StatelessWidget {
   }
 }
 
-class _ScreensExample extends StatelessWidget {
-  const _ScreensExample({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final SidebarXController controller;
+// Widget Placeholder untuk halaman yang belum ada
+class PlaceholderWidget extends StatelessWidget {
+  final String label;
+  const PlaceholderWidget(this.label, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        switch (controller.selectedIndex) {
-          case 0:
-            return ListView.builder(
-              padding: const EdgeInsets.only(top: 10),
-              itemBuilder: (context, index) => Container(
-                height: 100,
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).canvasColor,
-                  boxShadow: const [BoxShadow()],
-                ),
-              ),
-            );
-          case 1:
-            return Text(
-              'Search',
-              style: theme.textTheme.headlineSmall,
-            );
-          case 2:
-            return Text(
-              'People',
-              style: theme.textTheme.headlineSmall,
-            );
-          case 3:
-            return Text(
-              'Favorites',
-              style: theme.textTheme.headlineSmall,
-            );
-          case 4:
-            return Text(
-              'Profile',
-              style: theme.textTheme.headlineSmall,
-            );
-          case 5:
-            return Text(
-              'Settings',
-              style: theme.textTheme.headlineSmall,
-            );
-          default:
-            return Text(
-              'Not found page',
-              style: theme.textTheme.headlineSmall,
-            );
-        }
-      },
+    return Center(
+      child: Text(
+        'Halaman $label belum tersedia',
+        style: const TextStyle(fontSize: 24),
+      ),
     );
   }
 }

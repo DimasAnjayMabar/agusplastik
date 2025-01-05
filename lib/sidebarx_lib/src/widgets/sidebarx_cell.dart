@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class SidebarXCell extends StatefulWidget {
   const SidebarXCell({
-    Key? key,
+    super.key,
     required this.item,
     required this.extended,
     required this.selected,
@@ -13,7 +13,7 @@ class SidebarXCell extends StatefulWidget {
     required this.onLongPress,
     required this.onSecondaryTap,
     required this.animationController,
-  }) : super(key: key);
+  });
 
   final bool extended;
   final bool selected;
@@ -134,10 +134,10 @@ class _SidebarXCellState extends State<SidebarXCell> {
 
 class _Icon extends StatelessWidget {
   const _Icon({
-    Key? key,
+    super.key,
     required this.item,
     required this.iconTheme,
-  }) : super(key: key);
+  });
 
   final SidebarXItem item;
   final IconThemeData? iconTheme;

@@ -1,3 +1,4 @@
+import 'package:agusplastik/homepage.dart';
 import 'package:agusplastik/login_page.dart';
 import 'package:flutter/material.dart';
 
@@ -6,13 +7,16 @@ void main() {
 }
 
 class LoginPageApp extends StatelessWidget {
-  const LoginPageApp({Key? key}) : super(key: key);
+  const LoginPageApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      theme: ThemeData(
+        fontFamily: 'Montserratt'
+      ),
+      home: LoginPage(),
     );
   }
 }

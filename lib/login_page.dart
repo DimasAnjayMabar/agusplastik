@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:agusplastik/assets/colors/colors.dart';
 import 'package:agusplastik/beans/secure_storage/database.dart';
 import 'package:agusplastik/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -19,13 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _databaseController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode _ipFocusNode = FocusNode();
+  final FocusNode _usernameFocusNode = FocusNode();
+  final FocusNode _databaseFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
   bool _isLoading = false;
   String _message = '';
-  FocusNode _ipFocusNode = FocusNode();
-  FocusNode _usernameFocusNode = FocusNode();
-  FocusNode _databaseFocusNode = FocusNode();
-  FocusNode _passwordFocusNode = FocusNode();
+  bool _isPasswordVisible = false; // Control password visibility
 
   Future<void> _verifyConnection() async {
     setState(() {
@@ -79,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           setState(() {
-            _message = 'Koneksi gagal : ${data['message']}';
+            _message = 'Koneksi gagal: ${data['message']}';
           });
         }
       } else {
@@ -89,8 +91,10 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     } catch (e) {
-      _isLoading = false;
-      _message = 'Error : $e';
+      setState(() {
+        _isLoading = false;
+        _message = 'Error: $e';
+      });
     }
   }
 
@@ -98,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Color(0xFF03045e),
+        color: canvasColor,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -131,11 +135,12 @@ class _LoginPageState extends State<LoginPage> {
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF03045e),
+                  fillColor: canvasColor,
                 ),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 onSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_usernameFocusNode),
+                focusNode: _ipFocusNode,
               ),
               const SizedBox(height: 16.0),
               // Username Field
@@ -154,11 +159,12 @@ class _LoginPageState extends State<LoginPage> {
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF03045e),
+                  fillColor: canvasColor,
                 ),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
                 onSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_databaseFocusNode),
+                focusNode: _usernameFocusNode,
               ),
               const SizedBox(height: 16.0),
               // Database Field
@@ -177,33 +183,49 @@ class _LoginPageState extends State<LoginPage> {
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF03045e),
+                  fillColor: canvasColor,
                 ),
-                style: TextStyle(color: Colors.white),
-                onSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
+                style: const TextStyle(color: Colors.white),
+                onSubmitted: (_) =>
+                    FocusScope.of(context).requestFocus(_passwordFocusNode),
+                focusNode: _databaseFocusNode,
               ),
               const SizedBox(height: 16.0),
-              // Password Field
+              // Password Field with visibility toggle
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible, // Toggle visibility here
+                decoration: InputDecoration(
                   labelText: 'PASSWORD',
-                  labelStyle: TextStyle(color: Colors.white),
-                  border: OutlineInputBorder(
+                  labelStyle: const TextStyle(color: Colors.white),
+                  border: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
-                  enabledBorder: OutlineInputBorder(
+                  enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF03045e),
+                  fillColor: canvasColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                style: TextStyle(color: Colors.white),
-                onSubmitted: (_) => _verifyConnection,
+                style: const TextStyle(color: Colors.white),
+                onSubmitted: (_) => _verifyConnection(),
+                focusNode: _passwordFocusNode,
               ),
               const SizedBox(height: 32.0),
               // Login Button
@@ -240,7 +262,10 @@ class _LoginPageState extends State<LoginPage> {
     _usernameController.dispose();
     _passwordController.dispose();
     _databaseController.dispose();
-    _focusNode.dispose();
+    _ipFocusNode.dispose();
+    _usernameFocusNode.dispose();
+    _databaseFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 }
