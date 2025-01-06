@@ -1,7 +1,6 @@
 import 'dart:convert';
-
 import 'package:agusplastik/assets/colors/colors.dart';
-import 'package:agusplastik/beans/secure_storage/database.dart';
+import 'package:agusplastik/beans/secure_storage/database_identity.dart';
 import 'package:agusplastik/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +27,24 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String _message = '';
   bool _isPasswordVisible = false; // Control password visibility
+
+  // Function to retrieve saved identity and pre-fill fields
+  Future<void> _loadSavedIdentity() async {
+    try {
+      final dbIdentity = await StorageService.getDatabaseIdentity();
+      if (dbIdentity['serverIp'] != '') {
+        // If there is a saved identity, populate the fields
+        _ipController.text = dbIdentity['serverIp']!;
+        _usernameController.text = dbIdentity['serverUsername']!;
+        _databaseController.text = dbIdentity['serverDatabase']!;
+      }
+    } catch (e) {
+      // Handle error if retrieval fails
+      setState(() {
+        _message = 'Error loading saved identity: $e';
+      });
+    }
+  }
 
   Future<void> _verifyConnection() async {
     setState(() {
@@ -70,11 +87,11 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         if (data['status'] == 'success') {
-          await DatabaseIdentity.saveDatabaseIdentity(DatabaseIdentity(
+          await StorageService.saveDatabaseIdentity(
               serverIp: serverIp,
               serverUsername: serverUsername,
-              serverPassword: serverPassword,
-              serverDatabase: serverDatabase));
+              serverDatabase: serverDatabase);
+          await StorageService.savePassword(serverPassword);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => Homepage()),
@@ -96,6 +113,12 @@ class _LoginPageState extends State<LoginPage> {
         _message = 'Error: $e';
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedIdentity(); // Load saved database identity on initialization
   }
 
   @override

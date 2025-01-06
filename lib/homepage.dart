@@ -2,6 +2,7 @@ import 'package:agusplastik/assets/colors/colors.dart';
 import 'package:agusplastik/menus/distributor_menu.dart';
 import 'package:agusplastik/menus/gudang_menu.dart';
 import 'package:agusplastik/menus/transaksi_menu.dart';
+import 'package:agusplastik/popups/exit/logout.dart';
 import 'package:agusplastik/sidebarx_lib/src/controller/sidebarx_controller.dart';
 import 'package:agusplastik/sidebarx_lib/src/models/sidebarx_item.dart';
 import 'package:agusplastik/sidebarx_lib/src/sidebarx_base.dart';
@@ -171,11 +172,22 @@ class _HomepageState extends State<Homepage> {
               },
             ),
             SidebarXItem(
+              icon: Icons.settings,
+              label: 'Settings',
+              onTap: () {
+                setState(() {
+                  Logout.showExitPopup(context);
+                });
+                // Menutup sidebar tanpa mengubah halaman
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+            SidebarXItem(
               icon: Icons.exit_to_app,
               label: 'Logout',
               onTap: () {
                 setState(() {
-                  _logout();
+                  Logout.showExitPopup(context);
                 });
                 // Menutup sidebar tanpa mengubah halaman
                 _scaffoldKey.currentState?.openEndDrawer();
@@ -186,7 +198,8 @@ class _HomepageState extends State<Homepage> {
         appBar: AppBar(
           backgroundColor: canvasColor,
           title: Text(
-            _pageTitles[_currentPage], // Mengubah judul sesuai halaman yang aktif
+            _pageTitles[
+                _currentPage], // Mengubah judul sesuai halaman yang aktif
             style: const TextStyle(color: Colors.white),
           ),
           leading: IconButton(

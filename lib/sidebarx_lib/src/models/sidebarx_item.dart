@@ -15,6 +15,8 @@ class SidebarXItem {
     this.onLongPress,
     this.onSecondaryTap,
     this.selectable = true,
+    this.itemDecoration,
+    this.gapHeight = 0.0, // Menambahkan parameter gapHeight
   }) : assert(
           (icon != null || iconBuilder != null || iconWidget != null),
           'You can create SidebarXItem with IconData? icon or with Widget? iconWidget',
@@ -31,4 +33,9 @@ class SidebarXItem {
 
   /// The `itemBuilder` callback used for setup custom icon for [SidebarXItem]
   final SidebarXItemBuilder? iconBuilder;
+  
+  final dynamic itemDecoration;
+  
+  // Menambahkan properti gapHeight untuk menentukan jarak antar item
+  final double gapHeight;
 }
