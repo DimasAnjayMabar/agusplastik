@@ -1,8 +1,10 @@
 import 'package:agusplastik/assets/colors/colors.dart';
 import 'package:agusplastik/menus/distributor_menu.dart';
 import 'package:agusplastik/menus/gudang_menu.dart';
+import 'package:agusplastik/menus/setting_menu.dart';
 import 'package:agusplastik/menus/transaksi_menu.dart';
 import 'package:agusplastik/popups/exit/logout.dart';
+import 'package:agusplastik/popups/verify/verify_admin.dart';
 import 'package:agusplastik/sidebarx_lib/src/controller/sidebarx_controller.dart';
 import 'package:agusplastik/sidebarx_lib/src/models/sidebarx_item.dart';
 import 'package:agusplastik/sidebarx_lib/src/sidebarx_base.dart';
@@ -30,17 +32,8 @@ class _HomepageState extends State<Homepage> {
     'Hutang', // Judul untuk halaman Hutang
     'Piutang', // Judul untuk halaman Piutang
     'Distributor', // Judul untuk halaman Distributor
+    'Setting'
   ];
-
-  // Fungsi untuk logout
-  void _logout() {
-    // Implementasikan logika logout sesuai kebutuhan, misalnya:
-    // - Menghapus session atau token
-    // - Navigasi ke halaman login
-    // Contoh:
-    // Navigator.pushReplacementNamed(context, '/login');
-    print("Logout button pressed");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,9 +169,19 @@ class _HomepageState extends State<Homepage> {
               label: 'Settings',
               onTap: () {
                 setState(() {
-                  Logout.showExitPopup(context);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return VerifyAdmin(
+                        onSuccess: () {
+                          setState(() {
+                            _currentPage = 5; // Pindah ke halaman Setting
+                          });
+                        },
+                      );
+                    },
+                  );
                 });
-                // Menutup sidebar tanpa mengubah halaman
                 _scaffoldKey.currentState?.openEndDrawer();
               },
             ),
@@ -218,6 +221,7 @@ class _HomepageState extends State<Homepage> {
             PlaceholderWidget('Hutang'), // Halaman Hutang (Placeholder)
             PlaceholderWidget('Piutang'), // Halaman Piutang (Placeholder)
             const DistributorMenu(),
+            const SettingMenu()
           ],
         ),
       ),

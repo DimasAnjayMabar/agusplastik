@@ -25,7 +25,8 @@ class _CreateDistributorState extends State<CreateDistributor> {
       _formKey.currentState!.save();
 
       try {
-        final dbIdentity = StorageService.getDatabaseIdentity(); // Menarik data identitas database
+        final dbIdentity = await StorageService.getDatabaseIdentity(); // Menarik data identitas database
+        final dbPassword = await StorageService.getPassword();
 
         if (dbIdentity.isEmpty) throw Exception('Identitas database tidak ditemukan');
 
@@ -35,7 +36,7 @@ class _CreateDistributorState extends State<CreateDistributor> {
           body: json.encode({
             'server_ip': dbIdentity['serverIp'],
             'server_username': dbIdentity['serverUsername'],
-            'server_password': dbIdentity['serverPassword'], // Secure password handling
+            'server_password': dbPassword, // Secure password handling
             'server_database': dbIdentity['serverDatabase'],
             'distributor_name': distributorName,
             'distributor_phone_number': distributorPhoneNumber,
