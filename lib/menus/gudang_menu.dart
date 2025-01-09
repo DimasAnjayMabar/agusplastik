@@ -1,3 +1,4 @@
+import 'package:agusplastik/popups/create/create_product.dart';
 import 'package:flutter/material.dart';
 
 class GudangMenu extends StatefulWidget {
@@ -26,9 +27,22 @@ class _GudangMenuState extends State<GudangMenu> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add your action here for the button press
-          // For example, you can navigate to a different screen
-          print("Add button pressed");
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0), // Atur sudut melengkung
+                ),
+                contentPadding: EdgeInsets.zero, // Hilangkan padding default
+                content: Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: CreateProduct(),
+                ),
+              );
+            },
+          );
         },
         child: const Icon(Icons.add),
       ),
