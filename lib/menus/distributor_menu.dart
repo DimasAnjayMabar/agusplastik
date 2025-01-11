@@ -26,34 +26,44 @@ class _DistributorMenuState extends State<DistributorMenu> {
 
   // Fetch data distributor
   Future<void> fetchDistributors() async {
-    final dbIdentity = await StorageService.getDatabaseIdentity();
-    final dbPassword = await StorageService.getPassword();
+    try {
+      final dbIdentity = await StorageService.getDatabaseIdentity();
+      final dbPassword = await StorageService.getPassword();
 
-    final response = await http.post(
-      Uri.parse('http://${dbIdentity['serverIp']}:3000/distributors'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'servername': dbIdentity['serverIp'],
-        'username': dbIdentity['serverUsername'],
-        'password': dbPassword,
-        'database': dbIdentity['serverDatabase'],
-      }),
-    );
+      final response = await http.post(
+        Uri.parse('http://${dbIdentity['serverIp']}:3000/distributors'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': dbIdentity['serverIp'],
+          'server_username': dbIdentity['serverUsername'],
+          'server_password': dbPassword,
+          'server_database': dbIdentity['serverDatabase'],
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final distributors = json.decode(response.body)['distributors'];
-      setState(() {
-        _filteredDistributors = distributors;
-
-        for (var distributor in distributors) {
-          final lowerCaseName = distributor['distributor_name'].toLowerCase();
-          _distributorBTree.insertIntoBtree(lowerCaseName, distributor);
+      if (response.statusCode == 200) {
+        final distributors = json.decode(response.body)['distributors'];
+        
+        if (distributors == null || distributors.isEmpty) {
+          setState(() {
+            _filteredDistributors = [];  // Tidak ada data, set ke list kosong
+          });
+        } else {
+          setState(() {
+            _filteredDistributors = distributors;
+            for (var distributor in distributors) {
+              final lowerCaseName = distributor['distributor_name'].toLowerCase();
+              _distributorBTree.insertIntoBtree(lowerCaseName, distributor);
+            }
+          });
         }
-      });
-    } else {
-      throw Exception('Gagal untuk menampilkan distributor');
+      } else {
+        print('Error fetching distributors: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -66,12 +76,22 @@ class _DistributorMenuState extends State<DistributorMenu> {
     });
   }
 
+  // Fungsi untuk refresh data setelah navigasi
+  Future<void> _navigateAndRefresh(Widget page) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
+    if (result == true) {
+      fetchDistributors(); // Refresh data setelah kembali
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -95,77 +115,78 @@ class _DistributorMenuState extends State<DistributorMenu> {
           ),
           // ListView Builder with Scrollbar
           Expanded(
-            child: Scrollbar(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(top: 10),
-                itemCount: _filteredDistributors.length,
-                itemBuilder: (context, index) {
-                  final distributor = _filteredDistributors[index];
-
-                  return GestureDetector(
-                    onTap: () {
-                      // Panggil method untuk menampilkan DistributorView dengan ID
-                      showDialog(
-                        context: context,
-                        barrierDismissible: true, // Memungkinkan dialog ditutup dengan klik di luar
-                        builder: (BuildContext context) {
-                          return DistributorDetails(
-                            id: distributor['distributor_id'],
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      height: 100,
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Theme.of(context).canvasColor,
-                        boxShadow: const [BoxShadow()],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
+            child: _filteredDistributors.isEmpty
+                ? const Center(child: Text("Tidak ada distributor"))
+                : Scrollbar(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(top: 10),
+                      itemCount: _filteredDistributors.length,
+                      itemBuilder: (context, index) {
+                        final distributor = _filteredDistributors[index];
+                        return GestureDetector(
+                          onTap: () {
+                            // Tampilkan detail distributor
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (BuildContext context) {
+                                return DistributorDetails(
+                                  id: distributor['distributor_id'],
+                                );
+                              },
+                            );
+                          },
+                          child: Container(
+                            height: 100,
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Theme.of(context).canvasColor,
+                              boxShadow: const [BoxShadow()],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'Nama: ${distributor['distributor_name']}',
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Nama: ${distributor['distributor_name']}',
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                        Text(
+                                          'Telepon: ${distributor['distributor_phone_number'] ?? "Tidak ada telepon"}',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  Text(
-                                    'Telepon: ${distributor['distributor_phone_number'] ?? "Tidak ada telepon"}',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  const Icon(Icons.arrow_forward_ios, color: Colors.white),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.arrow_forward_ios, color: Colors.white),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
-          )
+                  ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return const CreateDistributor();
-            },
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateDistributor(),
+            ),
           );
         },
         child: const Icon(Icons.add),
